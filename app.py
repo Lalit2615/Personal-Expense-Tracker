@@ -47,18 +47,22 @@ def register():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if current_user.is_authenticated:
-        return redirect(url_for('index'))
-    if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
-        user = User.query.filter_by(username=username).first()
-        if user and check_password_hash(user.password_hash, password):
-            login_user(user)
-            flash(f'Welcome back, {user.username}!', 'success')
+    try:
+        if current_user.is_authenticated:
             return redirect(url_for('index'))
-        flash('Invalid username or password.', 'danger')
-    return render_template('login.html')
+        if request.method == 'POST':
+            username = request.form.get('username')
+            password = request.form.get('password')
+            user = User.query.filter_by(username=username).first()
+            if user and check_password_hash(user.password_hash, password):
+                login_user(user)
+                flash(f'Welcome back, {user.username}!', 'success')
+                return redirect(url_for('index'))
+            flash('Invalid username or password.', 'danger')
+        return render_template('login.html')
+    except Exception as e:
+        import traceback
+        return str(traceback.format_exc()), 500
 
 @app.route('/logout')
 @login_required
